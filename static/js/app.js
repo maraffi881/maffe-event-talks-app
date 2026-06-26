@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressCircle = document.getElementById('progress-circle');
     const tweetBtn = document.getElementById('tweet-btn');
     const clearSelectionBtn = document.getElementById('clear-selection');
+    const composerErrorMsg = document.getElementById('composer-error-msg');
 
     // Counts elements
     const countAll = document.getElementById('count-all');
@@ -173,8 +174,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="loading-state" style="border-style: dashed; padding: 3rem;">
                     <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
                     <p style="color: var(--text-secondary);">No release notes matched your filters.</p>
+                    <button id="empty-reset-btn" class="btn btn-primary empty-state-reset-btn">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset Search & Filters
+                    </button>
                 </div>
             `;
+            const emptyResetBtn = document.getElementById('empty-reset-btn');
+            if (emptyResetBtn) {
+                emptyResetBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    searchQuery = '';
+                    activeTypeFilter = 'all';
+                    filterChips.forEach(c => {
+                        if (c.getAttribute('data-type') === 'all') c.classList.add('active');
+                        else c.classList.remove('active');
+                    });
+                    renderReleases();
+                });
+            }
             return;
         }
 
@@ -343,18 +360,29 @@ document.addEventListener('DOMContentLoaded', () => {
             tweetBtn.disabled = true;
             tweetBtn.style.opacity = 0.5;
             tweetBtn.style.cursor = 'not-allowed';
+            if (composerErrorMsg) {
+                const diff = len - MAX_TWEET_LENGTH;
+                composerErrorMsg.textContent = `Tweet is ${diff} character${diff > 1 ? 's' : ''} too long. Please shorten to post.`;
+                composerErrorMsg.classList.remove('hidden');
+            }
         } else if (len > MAX_TWEET_LENGTH - 20) {
             progressCircle.style.stroke = '#f59e0b'; // Amber warning
             charCounter.style.color = '#f59e0b';
             tweetBtn.disabled = false;
             tweetBtn.style.opacity = 1;
             tweetBtn.style.cursor = 'pointer';
+            if (composerErrorMsg) {
+                composerErrorMsg.classList.add('hidden');
+            }
         } else {
             progressCircle.style.stroke = '#1d9bf0'; // Twitter blue
             charCounter.style.color = 'var(--text-muted)';
             tweetBtn.disabled = false;
             tweetBtn.style.opacity = 1;
             tweetBtn.style.cursor = 'pointer';
+            if (composerErrorMsg) {
+                composerErrorMsg.classList.add('hidden');
+            }
         }
     }
 
