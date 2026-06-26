@@ -429,12 +429,25 @@ a:hover {
     height: 100%;
 }
 
+.feed-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
 .feed-header-summary h2 {
     font-family: var(--font-heading);
     font-size: 1.75rem;
     font-weight: 700;
     letter-spacing: -0.025em;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0;
+}
+
+.btn.copied {
+    background-color: var(--color-feature-bg) !important;
+    color: var(--color-feature) !important;
+    border-color: var(--color-feature) !important;
 }
 
 .feed-header-summary p {

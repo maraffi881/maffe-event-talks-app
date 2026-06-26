@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshIcon = document.getElementById('refresh-icon');
     const themeToggle = document.getElementById('theme-toggle');
     const searchInput = document.getElementById('search-input');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
     const filterChips = document.querySelectorAll('.filter-chip');
     const showingText = document.getElementById('showing-text');
     const lastUpdatedTime = document.getElementById('last-updated-time');
@@ -112,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingState.classList.remove('hidden');
         errorState.classList.add('hidden');
         releasesContainer.classList.add('hidden');
+        if (exportCsvBtn) exportCsvBtn.style.display = 'none';
     }
 
     function showError(msg) {
@@ -119,12 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingState.classList.add('hidden');
         errorState.classList.remove('hidden');
         releasesContainer.classList.add('hidden');
+        if (exportCsvBtn) exportCsvBtn.style.display = 'none';
     }
 
     function showData() {
         loadingState.classList.add('hidden');
         errorState.classList.add('hidden');
         releasesContainer.classList.remove('hidden');
+        if (exportCsvBtn) exportCsvBtn.style.display = 'inline-flex';
     }
 
     function updateStats() {
@@ -189,9 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <i class="fa-regular ${selectedReleaseId === item.id ? 'fa-circle-check' : 'fa-circle'}"></i>
                         ${selectedReleaseId === item.id ? 'Selected' : 'Click to Select'}
                     </span>
-                    <button class="btn btn-secondary btn-xs inline-tweet-btn" data-id="${item.id}" title="Compose Tweet">
-                        <i class="fa-brands fa-x-twitter"></i> Tweet
-                    </button>
+                    <div style="display: flex; gap: 0.35rem;">
+                        <button class="btn btn-secondary btn-xs copy-card-btn" data-id="${item.id}" title="Copy to Clipboard">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                        <button class="btn btn-secondary btn-xs inline-tweet-btn" data-id="${item.id}" title="Compose Tweet">
+                            <i class="fa-brands fa-x-twitter"></i> Tweet
+                        </button>
+                    </div>
                 </div>
             `;
 
@@ -211,6 +220,18 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (e) => {
                 const id = btn.getAttribute('data-id');
                 selectRelease(id, true);
+            });
+        });
+
+        // Add event listeners to copy buttons
+        releasesContainer.querySelectorAll('.copy-card-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Avoid triggering card selection click
+                const id = btn.getAttribute('data-id');
+                const item = releases.find(r => r.id === id);
+                if (item) {
+                    copyToClipboard(item.content_text, btn);
+                }
             });
         });
     }
@@ -366,6 +387,55 @@ document.addEventListener('DOMContentLoaded', () => {
     clearSelectionBtn.addEventListener('click', () => {
         selectRelease(selectedReleaseId); // Toggle off selection
     });
+
+    // Copy utility helper
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    }
+
+    // Export to CSV utility
+    function exportToCSV() {
+        const filtered = getFilteredReleases();
+        if (filtered.length === 0) return;
+
+        const headers = ['Date', 'Type', 'Content', 'Link'];
+        const csvRows = [headers.join(',')];
+
+        filtered.forEach(item => {
+            const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
+            const cleanType = `"${item.type.replace(/"/g, '""')}"`;
+            const cleanContent = `"${item.content_text.replace(/"/g, '""')}"`;
+            const cleanLink = `"${item.link.replace(/"/g, '""')}"`;
+            
+            csvRows.push([cleanDate, cleanType, cleanContent, cleanLink].join(','));
+        });
+
+        const csvContent = "\ufeff" + csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `bigquery_release_notes_${activeTypeFilter}_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Export CSV click
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', exportToCSV);
+    }
 
     // Refresh clicks
     refreshBtn.addEventListener('click', fetchReleases);
