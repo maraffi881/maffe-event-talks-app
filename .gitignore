@@ -1,0 +1,27 @@
+# Python bytecode & cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+*.env
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE Configs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

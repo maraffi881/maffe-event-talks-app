@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes & Insights</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar / Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="bq-logo-icon">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>BigQuery</h1>
+                    <span class="subtitle">Release Notes Hub</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button id="refresh-btn" class="btn btn-primary" title="Refresh Release Notes">
+                    <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i>
+                    <span>Refresh</span>
+                </button>
+                <button id="theme-toggle" class="btn btn-secondary" title="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="app-main">
+            <!-- Sidebar filters -->
+            <section class="filters-sidebar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search release updates...">
+                </div>
+
+                <div class="filter-group">
+                    <h3>Filter by Type</h3>
+                    <div class="type-filters">
+                        <button class="filter-chip active" data-type="all">
+                            <span class="chip-color all"></span>
+                            <span class="chip-label">All Updates</span>
+                            <span class="chip-count" id="count-all">0</span>
+                        </button>
+                        <button class="filter-chip" data-type="Feature">
+                            <span class="chip-color feature"></span>
+                            <span class="chip-label">Features</span>
+                            <span class="chip-count" id="count-feature">0</span>
+                        </button>
+                        <button class="filter-chip" data-type="Change">
+                            <span class="chip-color change"></span>
+                            <span class="chip-label">Changes</span>
+                            <span class="chip-count" id="count-change">0</span>
+                        </button>
+                        <button class="filter-chip" data-type="Announcement">
+                            <span class="chip-color announcement"></span>
+                            <span class="chip-label">Announcements</span>
+                            <span class="chip-count" id="count-announcement">0</span>
+                        </button>
+                        <button class="filter-chip" data-type="Breaking">
+                            <span class="chip-color breaking"></span>
+                            <span class="chip-label">Breaking</span>
+                            <span class="chip-count" id="count-breaking">0</span>
+                        </button>
+                        <button class="filter-chip" data-type="Issue">
+                            <span class="chip-color issue"></span>
+                            <span class="chip-label">Issues</span>
+                            <span class="chip-count" id="count-issue">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="feed-stats-card">
+                    <h4>Feed Info</h4>
+                    <div class="stat-row">
+                        <span class="stat-label">Source Feed</span>
+                        <a href="https://docs.cloud.google.com/feeds/bigquery-release-notes.xml" target="_blank" class="stat-value feed-link">Google XML <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Last Checked</span>
+                        <span class="stat-value" id="last-updated-time">Never</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center Content: Release Notes Feed -->
+            <section class="feed-content">
+                <div class="feed-header-summary">
+                    <h2>Latest Updates</h2>
+                    <p id="showing-text">Loading latest release notes...</p>
+                </div>
+
+                <div id="loading-state" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Fetching BigQuery release notes...</p>
+                </div>
+
+                <div id="error-state" class="error-state hidden">
+                    <i class="fa-solid fa-triangle-exclamation error-icon"></i>
+                    <h3>Failed to load feed</h3>
+                    <p id="error-message">Unknown error occurred.</p>
+                    <button id="retry-btn" class="btn btn-secondary">Retry Connection</button>
+                </div>
+
+                <div id="releases-container" class="releases-list hidden">
+                    <!-- Release Cards go here -->
+                </div>
+            </section>
+
+            <!-- Right Column: Tweet Composer -->
+            <section class="tweet-composer-sidebar" id="composer-sidebar">
+                <div class="composer-header">
+                    <h3><i class="fa-brands fa-x-twitter"></i> Tweet Composer</h3>
+                </div>
+
+                <div id="composer-empty-state" class="composer-empty">
+                    <div class="composer-empty-icon">
+                        <i class="fa-regular fa-paper-plane animate-pulse"></i>
+                    </div>
+                    <p>Select any update from the feed to compose and schedule a Tweet.</p>
+                    <span class="composer-tip">Click a release card to begin.</span>
+                </div>
+
+                <div id="composer-form" class="composer-form-container hidden">
+                    <div class="selected-details">
+                        <div class="selected-meta">
+                            <span id="composer-type-badge" class="type-badge">Feature</span>
+                            <span id="composer-date" class="composer-date">June 25, 2026</span>
+                        </div>
+                        <p id="composer-source-text" class="composer-source-text">Original summary here...</p>
+                    </div>
+
+                    <div class="tweet-text-area-wrapper">
+                        <label for="tweet-text">Customize Tweet Content</label>
+                        <textarea id="tweet-text" rows="8" placeholder="What's happening?"></textarea>
+                        <div class="tweet-character-limit">
+                            <svg class="progress-ring" width="24" height="24">
+                                <circle class="progress-ring__circle-bg" stroke="#374151" stroke-width="2" fill="transparent" r="10" cx="12" cy="12" />
+                                <circle class="progress-ring__circle" id="progress-circle" stroke="#1d9bf0" stroke-width="2" fill="transparent" r="10" cx="12" cy="12" />
+                            </svg>
+                            <span id="char-counter">0 / 280</span>
+                        </div>
+                    </div>
+
+                    <div class="composer-actions">
+                        <button id="tweet-btn" class="btn btn-twitter btn-full">
+                            <i class="fa-brands fa-x-twitter"></i> Share on X
+                        </button>
+                        <button id="clear-selection" class="btn btn-text btn-full">
+                            Cancel Selection
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
