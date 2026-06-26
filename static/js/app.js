@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const refreshBtn = document.getElementById('refresh-btn');
     const refreshIcon = document.getElementById('refresh-icon');
-    const themeToggle = document.getElementById('theme-toggle');
+    const themeCheckbox = document.getElementById('checkbox');
     const searchInput = document.getElementById('search-input');
     const exportCsvBtn = document.getElementById('export-csv-btn');
     const filterChips = document.querySelectorAll('.filter-chip');
@@ -56,18 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
         document.body.classList.remove('dark-theme');
-        themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        if (themeCheckbox) themeCheckbox.checked = false;
     } else {
         document.body.classList.add('dark-theme');
-        themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        if (themeCheckbox) themeCheckbox.checked = true;
     }
 
-    themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-theme');
-        const isDark = document.body.classList.contains('dark-theme');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        themeToggle.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
-    });
+    if (themeCheckbox) {
+        themeCheckbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
 
     /* ==========================================================================
        Fetch & Parse Release Notes

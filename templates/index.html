@@ -32,9 +32,14 @@
                     <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i>
                     <span>Refresh</span>
                 </button>
-                <button id="theme-toggle" class="btn btn-secondary" title="Toggle Theme">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
+                <div class="theme-switch-wrapper">
+                    <i class="fa-solid fa-sun icon-sun" title="Light Mode"></i>
+                    <label class="theme-switch" for="checkbox">
+                        <input type="checkbox" id="checkbox" />
+                        <div class="slider round"></div>
+                    </label>
+                    <i class="fa-solid fa-moon icon-moon" title="Dark Mode"></i>
+                </div>
             </div>
         </header>
 
